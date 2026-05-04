@@ -34,8 +34,8 @@ h2 { margin: 0 0 16px; font-size: 20px; }
 .table-card { min-width: 0; }
 .table-wrap { overflow: auto; }
 table { width: 100%; border-collapse: collapse; min-width: 820px; }
-th { text-align: left; color: #68758c; font-size: 13px; border-bottom: 1px solid #e5eaf2; padding: 12px; }
-td { border-bottom: 1px solid #eef2f7; padding: 12px; vertical-align: middle; }
+th { text-align: left; color: #68758c; font-size: 13px; border-bottom: 1px solid #e5eaf2; padding: 8px 9px; }
+td { border-bottom: 1px solid #eef2f7; padding: 8px 9px; vertical-align: middle; }
 tr { cursor: pointer; }
 tr:hover { background: #f8fbff; }
 tr.low { background: #fff7ed; }
