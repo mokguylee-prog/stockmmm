@@ -65,6 +65,8 @@ tr.low { background: #fff7ed; }
 tr.low td:first-child::before { content: '부족'; color: #ea580c; border: 1px solid #fed7aa; border-radius: 999px; padding: 2px 7px; font-size: 11px; margin-right: 6px; }
 .side { position: sticky; top: 18px; display: grid; gap: 18px; max-height: calc(100vh - 36px); overflow: auto; }
 .form { display: grid; gap: 10px; }
+.field { display: grid; gap: 6px; color: #526176; font-size: 12px; font-weight: 800; }
+.field input, .field textarea, .field select { font-size: 14px; font-weight: 400; color: #172033; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .secondary { background: #e5e7eb; color: #172033; }
 .actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
