@@ -1,6 +1,6 @@
 <svg width="96" height="64" viewBox="0 0 96 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="죽동:이영일 logo">
   <rect x="8" y="10" width="80" height="44" rx="12" fill="#2563EB"/>
   <rect x="20" y="20" width="56" height="24" rx="7" fill="#F8FBFF"/>
-  <text x="48" y="38" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="800" letter-spacing="1.5" fill="#2563EB">LYL</text>
+  <text x="48" y="38" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="800" letter-spacing="1.5" fill="#2563EB">LYi</text>
   <path d="M24 32H12M84 32H72M34 24V14M48 24V14M62 24V14M34 50V40M48 50V40M62 50V40" stroke="#BFDBFE" stroke-width="3" stroke-linecap="round"/>
 </svg>

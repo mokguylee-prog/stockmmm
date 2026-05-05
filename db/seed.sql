@@ -12,6 +12,30 @@ VALUES
   ('IC-QFN32-MCU-001', 'STM32 MCU', 'IC', 'STMicroelectronics', 'STM32G0B1KET6', 'QFN-32', NULL, 'B2-03', 24, 10, 'Main controller candidate')
 ON CONFLICT (sku) DO NOTHING;
 
+INSERT INTO parts (sku, name, category, manufacturer, mpn, footprint, value, location, quantity, min_quantity, notes)
+SELECT
+  format('DEMO-%s-%s', upper(left(category, 3)), lpad(n::text, 3, '0')),
+  format('%s Sample Part %s', category, lpad(n::text, 3, '0')),
+  category,
+  manufacturer,
+  format('%s-%s', upper(left(manufacturer, 3)), lpad(n::text, 3, '0')),
+  footprint,
+  part_value,
+  location,
+  20 + (n * 17 % 980),
+  10 + (n * 3 % 90),
+  'Generated demo inventory item'
+FROM generate_series(1, 100) AS s(n)
+CROSS JOIN LATERAL (
+  SELECT
+    (ARRAY['Resistor', 'Capacitor', 'IC', 'Connector', 'Inductor', 'Diode', 'Transistor', 'Crystal', 'Sensor', 'Module'])[(n - 1) % 10 + 1] AS category,
+    (ARRAY['Yageo', 'Murata', 'STMicroelectronics', 'Molex', 'TDK', 'Vishay', 'Infineon', 'Epson', 'Bosch', 'Espressif'])[(n - 1) % 10 + 1] AS manufacturer,
+    (ARRAY['0402', '0603', '0805', 'QFN-32', 'SOT-23', 'SMA', 'TQFP-48', 'HC-49', 'LGA-8', 'Castellated'])[(n - 1) % 10 + 1] AS footprint,
+    (ARRAY['1kΩ', '100nF', NULL, '2x5', '10uH', 'Schottky', 'N-MOSFET', '16MHz', 'IMU', 'WiFi BLE'])[(n - 1) % 10 + 1] AS part_value,
+    (ARRAY['A1-01', 'A1-02', 'B2-03'])[(n - 1) % 3 + 1] AS location
+) AS sample
+ON CONFLICT (sku) DO NOTHING;
+
 INSERT INTO boms (name, revision, description)
 VALUES ('Demo Controller PCB', 'A', 'Sample BOM for validation')
 ON CONFLICT (name, revision) DO NOTHING;
