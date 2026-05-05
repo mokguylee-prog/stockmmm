@@ -10,6 +10,10 @@ React + Express + PostgreSQL 기반 PCB/전자부품 재고관리 앱입니다.
 - 입고/출고/조정 이력 기록
 - 부족 재고 표시
 
+## 문서
+
+- [구현 문서](docs/README.md)
+
 ## 실행
 
 ```bash
