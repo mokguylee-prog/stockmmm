@@ -135,7 +135,7 @@ function App() {
 
   return (
     <main className="app">
-      <header className="hero"><div className="brand"><img src={companyLogo} alt="유성구죽동이영일 로고" /><div><p className="eyebrow">PCB Design · Firmware</p><h1>PCB 재고관리 <span>[유성구죽동이영일]</span></h1><p>부품, 입출고, BOM, 위치/랙, CSV를 한 화면에서 관리합니다.</p></div></div><div className="stats"><span><b>{parts.length}</b> 품목</span><span><b>{totalQuantity}</b> 총수량</span><span className={lowStockCount ? 'danger' : ''}><b>{lowStockCount}</b> 부족</span></div></header>
+      <header className="hero"><div className="brand"><img src={companyLogo} alt="죽동:이영일 로고" /><div><p className="eyebrow">PCB Design · Firmware</p><h1>PCB 재고관리 <span>[죽동:이영일]</span></h1><p>부품, 입출고, BOM, 위치/랙, CSV를 한 화면에서 관리합니다.</p></div></div><div className="stats"><span><b>{parts.length}</b> 품목</span><span><b>{totalQuantity}</b> 총수량</span><span className={lowStockCount ? 'danger' : ''}><b>{lowStockCount}</b> 부족</span></div></header>
       <section className="toolbar card"><input value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === 'Enter' && void loadParts()} placeholder="SKU, 품명, 제조사, 위치 검색" /><button onClick={() => void loadParts()}>{loading ? '검색 중...' : '검색'}</button><a className="button-link" href="/api/parts/export.csv">CSV export</a><label className="file-button">CSV import<input type="file" accept=".csv,text/csv" onChange={(e) => void importCsv(e.target.files?.[0])} /></label><label className="check"><input type="checkbox" checked={lowStockOnly} onChange={(event) => setLowStockOnly(event.target.checked)} /> 부족 재고만</label></section>
       {message && <div className="notice" onClick={() => setMessage('')}>{message}</div>}
 

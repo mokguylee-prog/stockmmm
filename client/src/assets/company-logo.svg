@@ -1,18 +1,6 @@
-<svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="유성구죽동이영일 logo">
-  <rect x="8" y="8" width="56" height="56" rx="16" fill="url(#g)"/>
-  <rect x="20" y="20" width="32" height="32" rx="7" fill="#EAF4FF" opacity="0.96"/>
-  <path d="M28 33h16M28 39h10" stroke="#1D4ED8" stroke-width="3" stroke-linecap="round"/>
-  <circle cx="25" cy="25" r="2.8" fill="#38BDF8"/>
-  <circle cx="47" cy="25" r="2.8" fill="#38BDF8"/>
-  <circle cx="25" cy="47" r="2.8" fill="#38BDF8"/>
-  <circle cx="47" cy="47" r="2.8" fill="#38BDF8"/>
-  <path d="M25 20v-7M47 20v-7M25 59v-7M47 59v-7M20 25h-7M20 47h-7M59 25h-7M59 47h-7" stroke="#93C5FD" stroke-width="3" stroke-linecap="round"/>
-  <path d="M31 50c6-1 10-5 11-11" stroke="#0F766E" stroke-width="3" stroke-linecap="round"/>
-  <defs>
-    <linearGradient id="g" x1="10" y1="9" x2="63" y2="64" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#0EA5E9"/>
-      <stop offset="0.55" stop-color="#2563EB"/>
-      <stop offset="1" stop-color="#1E3A8A"/>
-    </linearGradient>
-  </defs>
+<svg width="96" height="64" viewBox="0 0 96 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="죽동:이영일 logo">
+  <rect x="8" y="10" width="80" height="44" rx="12" fill="#2563EB"/>
+  <rect x="20" y="20" width="56" height="24" rx="7" fill="#F8FBFF"/>
+  <text x="48" y="38" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="800" letter-spacing="1.5" fill="#2563EB">LYL</text>
+  <path d="M24 32H12M84 32H72M34 24V14M48 24V14M62 24V14M34 50V40M48 50V40M62 50V40" stroke="#BFDBFE" stroke-width="3" stroke-linecap="round"/>
 </svg>
