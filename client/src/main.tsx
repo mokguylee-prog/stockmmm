@@ -46,6 +46,9 @@ function App() {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [activeMainTab, setActiveMainTab] = useState<'inventory' | 'locations' | 'boms'>('inventory');
+  const [selectedLocationCode, setSelectedLocationCode] = useState<string | null>(null);
+  const [locationParts, setLocationParts] = useState<Part[]>([]);
+  const [locationPartsLoading, setLocationPartsLoading] = useState(false);
 
   const selected = useMemo(() => parts.find((part) => part.id === selectedId) ?? null, [parts, selectedId]);
   const selectedBom = useMemo(() => boms.find((bom) => bom.id === selectedBomId) ?? null, [boms, selectedBomId]);
@@ -109,6 +112,37 @@ function App() {
     catch (error) { setMessage(error instanceof Error ? error.message : '위치 삭제 실패'); }
   }
 
+  async function selectLocation(loc: Location) {
+    setLocationForm({ code: loc.code, rack: loc.rack, shelf: loc.shelf ?? '', bin: loc.bin ?? '', note: loc.note ?? '' });
+    setSelectedLocationCode(loc.code);
+    setLocationPartsLoading(true);
+    try {
+      const qs = new URLSearchParams({ search: loc.code });
+      const list = await api<Part[]>(`/api/parts?${qs.toString()}`);
+      setLocationParts(list.filter((part) => part.location === loc.code));
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : '위치 부품 불러오기 실패');
+    } finally {
+      setLocationPartsLoading(false);
+    }
+  }
+
+  async function showLocationInInventory() {
+    if (!selectedLocationCode) return;
+    setSearch(selectedLocationCode);
+    setActiveMainTab('inventory');
+    setLoading(true);
+    try {
+      const qs = new URLSearchParams({ search: selectedLocationCode });
+      if (lowStockOnly) qs.set('lowStock', 'true');
+      setParts(await api<Part[]>(`/api/parts?${qs.toString()}`));
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : '불러오기 실패');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function saveBom(event: React.FormEvent) {
     event.preventDefault();
     try { const saved = await api<Bom>('/api/boms', { method: 'POST', body: JSON.stringify(bomForm) }); setBomForm(emptyBom); setSelectedBomId(saved.id); setMessage('BOM을 저장했습니다.'); await loadBoms(); }
@@ -144,15 +178,15 @@ function App() {
         <div role="tabpanel">
           <section className="toolbar card"><input value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === 'Enter' && void loadParts()} placeholder="SKU, 품명, 제조사, 위치 검색" /><button onClick={() => void loadParts()}>{loading ? '검색 중...' : '검색'}</button><a className="button-link" href="/api/parts/export.csv">CSV export</a><label className="file-button">CSV import<input type="file" accept=".csv,text/csv" onChange={(e) => void importCsv(e.target.files?.[0])} /></label><label className="check"><input type="checkbox" checked={lowStockOnly} onChange={(event) => setLowStockOnly(event.target.checked)} /> 부족 재고만</label></section>
           <div className="grid">
-            <section className="card table-card"><h2>재고 목록</h2><div className="table-wrap"><table><thead><tr><th>SKU</th><th>품명</th><th>분류</th><th>위치</th><th>수량</th><th></th></tr></thead><tbody>{parts.map((part) => <tr key={part.id} className={part.quantity <= part.minQuantity ? 'low' : ''} onClick={() => setSelectedId(part.id)}><td title={part.sku}>{part.sku}</td><td><b>{part.name}</b><small>{part.manufacturer} {part.mpn}</small></td><td>{part.category}</td><td>{part.location || '-'}</td><td>{part.quantity} {part.unit}<small>min {part.minQuantity}</small></td><td><button onClick={(event) => { event.stopPropagation(); edit(part); }}>수정</button></td></tr>)}</tbody></table></div></section>
-            <aside className="side"><section className="card"><h2>{editingId ? '부품 수정' : '부품 등록'}</h2><form onSubmit={savePart} className="form"><input required placeholder="SKU" value={form.sku} onChange={(e) => updateField('sku', e.target.value)} /><input required placeholder="품명" value={form.name} onChange={(e) => updateField('name', e.target.value)} /><input placeholder="분류" value={form.category} onChange={(e) => updateField('category', e.target.value)} /><input placeholder="제조사" value={form.manufacturer ?? ''} onChange={(e) => updateField('manufacturer', e.target.value)} /><input placeholder="MPN" value={form.mpn ?? ''} onChange={(e) => updateField('mpn', e.target.value)} /><div className="two"><input placeholder="Footprint" value={form.footprint ?? ''} onChange={(e) => updateField('footprint', e.target.value)} /><input placeholder="Value" value={form.value ?? ''} onChange={(e) => updateField('value', e.target.value)} /></div><div className="two"><select value={form.location ?? ''} onChange={(e) => updateField('location', e.target.value)}><option value="">위치 선택</option>{locations.map((loc) => <option key={loc.id} value={loc.code}>{loc.code}</option>)}</select><input placeholder="단위" value={form.unit} onChange={(e) => updateField('unit', e.target.value)} /></div><div className="two"><input type="number" min="0" placeholder="수량" value={form.quantity} onChange={(e) => updateField('quantity', Number(e.target.value))} /><input type="number" min="0" placeholder="최소재고" value={form.minQuantity} onChange={(e) => updateField('minQuantity', Number(e.target.value))} /></div><textarea placeholder="메모" value={form.notes ?? ''} onChange={(e) => updateField('notes', e.target.value)} /><button type="submit">{editingId ? '수정 저장' : '등록'}</button>{editingId && <button type="button" className="secondary" onClick={() => { setEditingId(null); setForm(emptyPart); }}>취소</button>}</form></section>
+            <section className="card table-card"><h2>재고 목록</h2><div className="table-wrap"><table><thead><tr><th className="hint" data-tooltip="Stock Keeping Unit: 재고 품목을 구분하는 고유 관리 코드입니다.">SKU</th><th>품명</th><th>분류</th><th>위치</th><th>수량</th><th></th></tr></thead><tbody>{parts.map((part) => <tr key={part.id} className={part.quantity <= part.minQuantity ? 'low' : ''} onClick={() => setSelectedId(part.id)}><td title={part.sku}>{part.sku}</td><td><b>{part.name}</b><small>{part.manufacturer} {part.mpn}</small></td><td>{part.category}</td><td>{part.location || '-'}</td><td>{part.quantity} {part.unit}<small>min {part.minQuantity}</small></td><td><button onClick={(event) => { event.stopPropagation(); edit(part); }}>수정</button></td></tr>)}</tbody></table></div></section>
+            <aside className="side"><section className="card"><h2>{editingId ? '부품 수정' : '부품 등록'}</h2><form onSubmit={savePart} className="form"><input required placeholder="SKU" title="Stock Keeping Unit: 재고 품목을 구분하는 고유 관리 코드입니다." value={form.sku} onChange={(e) => updateField('sku', e.target.value)} /><input required placeholder="품명" value={form.name} onChange={(e) => updateField('name', e.target.value)} /><input placeholder="분류" value={form.category} onChange={(e) => updateField('category', e.target.value)} /><input placeholder="제조사" value={form.manufacturer ?? ''} onChange={(e) => updateField('manufacturer', e.target.value)} /><input placeholder="MPN" value={form.mpn ?? ''} onChange={(e) => updateField('mpn', e.target.value)} /><div className="two"><input placeholder="Footprint" value={form.footprint ?? ''} onChange={(e) => updateField('footprint', e.target.value)} /><input placeholder="Value" value={form.value ?? ''} onChange={(e) => updateField('value', e.target.value)} /></div><div className="two"><select value={form.location ?? ''} onChange={(e) => updateField('location', e.target.value)}><option value="">위치 선택</option>{locations.map((loc) => <option key={loc.id} value={loc.code}>{loc.code}</option>)}</select><input placeholder="단위" value={form.unit} onChange={(e) => updateField('unit', e.target.value)} /></div><div className="two"><input type="number" min="0" placeholder="수량" value={form.quantity} onChange={(e) => updateField('quantity', Number(e.target.value))} /><input type="number" min="0" placeholder="최소재고" value={form.minQuantity} onChange={(e) => updateField('minQuantity', Number(e.target.value))} /></div><textarea placeholder="메모" value={form.notes ?? ''} onChange={(e) => updateField('notes', e.target.value)} /><button type="submit">{editingId ? '수정 저장' : '등록'}</button>{editingId && <button type="button" className="secondary" onClick={() => { setEditingId(null); setForm(emptyPart); }}>취소</button>}</form></section>
             <section className="card"><h2>입출고</h2>{selected ? <><p><b>{selected.name}</b><br /><small>{selected.sku} · 현재 {selected.quantity}{selected.unit}</small></p><input type="number" min="1" value={movementQty} onChange={(e) => setMovementQty(Number(e.target.value))} /><div className="actions"><button onClick={() => void moveStock('IN')}>입고</button><button onClick={() => void moveStock('OUT')}>출고</button><button onClick={() => void moveStock('ADJUST')}>실사조정</button></div><button className="danger-btn" onClick={() => void deletePart(selected.id)}>부품 삭제</button></> : <p>목록에서 부품을 선택하세요.</p>}</section></aside>
           </div>
         </div>
       )}
 
       {activeMainTab === 'locations' && (
-        <section className="card tab-panel" role="tabpanel"><h2>위치/랙 관리</h2><form className="form compact" onSubmit={saveLocation}><div className="two"><input required placeholder="위치코드 예: A1-01" value={locationForm.code} onChange={(e) => setLocationForm({ ...locationForm, code: e.target.value })} /><input required placeholder="랙" value={locationForm.rack} onChange={(e) => setLocationForm({ ...locationForm, rack: e.target.value })} /></div><div className="two"><input placeholder="선반" value={locationForm.shelf ?? ''} onChange={(e) => setLocationForm({ ...locationForm, shelf: e.target.value })} /><input placeholder="칸" value={locationForm.bin ?? ''} onChange={(e) => setLocationForm({ ...locationForm, bin: e.target.value })} /></div><input placeholder="메모" value={locationForm.note ?? ''} onChange={(e) => setLocationForm({ ...locationForm, note: e.target.value })} /><button>위치 저장</button></form><div className="chips">{locations.map((loc) => <button key={loc.id} className="chip" onClick={() => setLocationForm({ code: loc.code, rack: loc.rack, shelf: loc.shelf ?? '', bin: loc.bin ?? '', note: loc.note ?? '' })}>{loc.code}<small>{loc.rack}-{loc.shelf}-{loc.bin}</small></button>)}</div>{locations.length > 0 && <button className="secondary tiny" onClick={() => void deleteLocation(locations[locations.length - 1].id)}>마지막 위치 삭제</button>}</section>
+        <section className="card tab-panel" role="tabpanel"><h2>위치/랙 관리</h2><div className="location-layout"><aside className="location-list"><h3>위치 목록</h3>{locations.map((loc) => <button key={loc.id} className={selectedLocationCode === loc.code ? 'location-item selected' : 'location-item'} onClick={() => void selectLocation(loc)}><b>{loc.code}</b><small>{loc.rack}-{loc.shelf}-{loc.bin}</small></button>)}</aside><div className="location-detail"><form className="form compact" onSubmit={saveLocation}><div className="two"><input required placeholder="위치코드 예: A1-01" value={locationForm.code} onChange={(e) => setLocationForm({ ...locationForm, code: e.target.value })} /><input required placeholder="랙" value={locationForm.rack} onChange={(e) => setLocationForm({ ...locationForm, rack: e.target.value })} /></div><div className="two"><input placeholder="선반" value={locationForm.shelf ?? ''} onChange={(e) => setLocationForm({ ...locationForm, shelf: e.target.value })} /><input placeholder="칸" value={locationForm.bin ?? ''} onChange={(e) => setLocationForm({ ...locationForm, bin: e.target.value })} /></div><input placeholder="메모" value={locationForm.note ?? ''} onChange={(e) => setLocationForm({ ...locationForm, note: e.target.value })} /><button>위치 저장</button></form>{locations.length > 0 && <button className="secondary tiny" onClick={() => void deleteLocation(locations[locations.length - 1].id)}>마지막 위치 삭제</button>}<div className="location-parts"><div className="section-head"><h3>{selectedLocationCode ? `${selectedLocationCode} 부품` : '위치별 부품'}</h3>{selectedLocationCode && <button className="secondary tiny" onClick={() => void showLocationInInventory()}>재고/부품에서 보기</button>}</div>{!selectedLocationCode && <p className="empty">왼쪽 위치 목록에서 위치를 선택하면 해당 위치의 부품이 표시됩니다.</p>}{selectedLocationCode && locationPartsLoading && <p className="empty">부품을 불러오는 중입니다.</p>}{selectedLocationCode && !locationPartsLoading && locationParts.length === 0 && <p className="empty">이 위치에 등록된 부품이 없습니다.</p>}{selectedLocationCode && !locationPartsLoading && locationParts.length > 0 && <div className="location-part-list">{locationParts.map((part) => <div key={part.id} className={part.quantity <= part.minQuantity ? 'location-part low' : 'location-part'}><span><b>{part.sku}</b>{part.name}<small>{part.manufacturer || '-'} {part.mpn || ''}</small></span><span>{part.quantity} {part.unit}<small>min {part.minQuantity}</small></span></div>)}</div>}</div></div></div></section>
       )}
 
       {activeMainTab === 'boms' && (
