@@ -30,7 +30,7 @@ h2 { margin: 0 0 16px; font-size: 20px; }
 .danger { color: #dc2626; }
 
 .card { background: rgba(255,255,255,.92); border: 1px solid #dfe5ef; border-radius: 18px; padding: 18px; box-shadow: 0 16px 50px rgba(20, 30, 50, .08); }
-.toolbar { display: grid; grid-template-columns: 1fr auto auto auto auto; align-items: center; gap: 10px; margin-bottom: 18px; }
+.toolbar { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(130px, auto) minmax(120px, auto) auto auto auto auto; align-items: center; gap: 10px; margin-bottom: 18px; }
 .main-tabs { display: inline-flex; gap: 4px; border: 1px solid #dfe5ef; border-radius: 14px; padding: 4px; margin-bottom: 18px; background: #f3f6fb; overflow: visible; }
 .tab { position: relative; min-width: 108px; border-radius: 10px; padding: 9px 14px; background: transparent; color: #526176; box-shadow: none; }
 .tab.active { background: #2563eb; color: white; }
